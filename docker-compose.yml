@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-management
+    restart: always
+    environment:
+      MYSQL_DATABASE: managementdb
+      MYSQL_PASSWORD: 12345
+      MYSQL_ROOT_PASSWORD: 12345
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+
+  management-app:
+    build: .
+    container_name: management-app
+    restart: always
+    depends_on:
+      - mysql-db
+    environment:
+      SPRING_APPLICATION_NAME: management
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/managementdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 12345
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQLDialect
+      SERVER_PORT: 8787
+    ports:
+      - "8787:8787"
+
+volumes:
+  mysql_data:
